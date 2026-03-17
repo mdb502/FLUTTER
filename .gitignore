@@ -1,0 +1,29 @@
+# --- CARPETAS PRIVADAS / NO DESEADAS ---
+# Aquí escribe el nombre de la carpeta que NO quieres subir:
+remoto_iot_old/
+
+# --- FLUTTER & DART ---
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+bin/
+obj/
+
+# --- ANDROID ---
+.gradle/
+local.properties
+**/android/**/generated/
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+
+# --- IDEs & OS ---
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
