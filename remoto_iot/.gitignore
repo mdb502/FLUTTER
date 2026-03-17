@@ -1,0 +1,29 @@
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+
+# Cambiamos /build/ por build/ (sin la diagonal inicial) 
+# para que ignore las carpetas de compilación en cualquier subnivel
+build/
+bin/
+obj/
+/coverage/
+
+# Archivos de configuración de Flutter
+.packages
+.flutter-plugins
+GeneratedPluginRegistrant.java
+
+# Android Studio / IntelliJ
+*.iml
+.idea/
+.gradle/
+local.properties
+
+# Especial para ESP-IDF (si llegas a mezclar archivos de configuración)
+sdkconfig
+build/
