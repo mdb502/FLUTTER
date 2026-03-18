@@ -9,7 +9,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _logoScale;
   late Animation<double> _textScale;
@@ -24,14 +25,16 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     );
 
     // Animación del Logo: Inicia grande (2.0) y llega a tamaño normal (1.0)
-    _logoScale = Tween<double>(begin: 2.5, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
-    );
+    _logoScale = Tween<double>(
+      begin: 2.5,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
     // Animación del Texto: Inicia en cero y llega a su tamaño (1.0)
-    _textScale = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _textScale = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
     // Iniciar animación
     _controller.forward();
@@ -63,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
             ScaleTransition(
               scale: _logoScale,
               child: Image.asset(
-                'assets/images/logo.png',
+                'assets/images/logo.png', // Asegúrate de añadirlo a tu pubspec.yaml
                 width: 180,
               ),
             ),

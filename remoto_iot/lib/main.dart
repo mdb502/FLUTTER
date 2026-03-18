@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'screens/splash_screen.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const MdbHomeApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MdbHomeApp extends StatelessWidget {
+  const MdbHomeApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
+    return MaterialApp(
+      title: 'mdbHome',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(
+          0xFFE0E5EC,
+        ), // Color Neomórfico base
       ),
+      home: const SplashScreen(),
     );
   }
 }
