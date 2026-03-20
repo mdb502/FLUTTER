@@ -14,7 +14,7 @@ obj/
 /coverage/
 
 # Archivos de configuración de Flutter
-.packages
+.dart_tool/package_config.json
 .flutter-plugins
 GeneratedPluginRegistrant.java
 
@@ -27,3 +27,18 @@ local.properties
 # Especial para ESP-IDF (si llegas a mezclar archivos de configuración)
 sdkconfig
 build/
+
+.env
+
+# Sistema Operativo
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Flutter temporales
+.metadata
+
+android/app/google-services.json

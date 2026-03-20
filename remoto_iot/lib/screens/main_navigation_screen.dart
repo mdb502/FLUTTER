@@ -1,11 +1,8 @@
-// lib/screens/main_navigation_screen.dart
-
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'luces_int_screen.dart';
 import 'luces_ext_screen.dart';
-import 'luz_piscina_screen.dart';
-import 'multimedia_screen.dart';
-import 'clima_screen.dart';
+import 'login_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -15,8 +12,8 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  // Estado inicial: Luces Interiores
-  Widget _currentScreen = const LucesIntScreen();
+  // Volvemos al manejo de estados por Widget y Título
+  Widget _currentScreen = const LucesInterioresScreen();
   String _currentTitle = 'Luces Interiores';
 
   void _updateScreen(Widget screen, String title) {
@@ -24,124 +21,118 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       _currentScreen = screen;
       _currentTitle = title;
     });
-    Navigator.pop(context); // Cierra el menú lateral automáticamente
+    Navigator.pop(context); // Cierra el drawer al seleccionar
   }
 
   @override
   Widget build(BuildContext context) {
-    // Definimos el color neomórfico base para reutilizarlo
-    const Color neumorphicBackground = Color(0xFFE0E5EC);
-
     return Scaffold(
-      backgroundColor: neumorphicBackground,
       appBar: AppBar(
-        title: Text(
-          _currentTitle,
-          style: const TextStyle(
-            fontWeight: FontWeight.w300,
-            color: Colors.black87,
+        title: Text(_currentTitle),
+        backgroundColor: const Color(0xFFE0E5EC),
+        elevation: 0,
+        foregroundColor: Colors.black54,
+      ),
+
+      body: _currentScreen,
+
+      // Espacio reservado para la futura barra informativa
+      bottomNavigationBar: Container(
+        height: 60,
+        color: const Color(0xFFE0E5EC),
+        child: const Center(
+          child: Text(
+            "Barra informativa (Próximamente)",
+            style: TextStyle(color: Colors.black38, fontSize: 12),
           ),
         ),
-        centerTitle: true,
-        backgroundColor:
-            Colors.transparent, // Barra transparente para que se vea el fondo
-        elevation: 0, // Sin sombra
-        iconTheme: const IconThemeData(
-          color: Colors.black87,
-        ), // Icono del menú en oscuro
       ),
-      // --- AQUÍ ESTÁ EL MENÚ LATERAL MODIFICADO ---
+
       drawer: Drawer(
-        backgroundColor: neumorphicBackground, // Fondo del drawer neomórfico
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            // Encabezado con imagen de fondo
-            UserAccountsDrawerHeader(
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  // 1. Asegúrate de tener 'living_a.jpg' en assets/images/
-                  image: AssetImage('assets/images/living_a.jpg'),
-                  fit: BoxFit.cover, // La imagen cubre todo el espacio
+        child: Container(
+          color: const Color(0xFFE0E5EC),
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              UserAccountsDrawerHeader(
+                decoration: const BoxDecoration(
+                  color: Color(0xFFE0E5EC),
+                  image: DecorationImage(
+                    image: AssetImage('assets/images/living_a.jpg'),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                accountName: const Text(
+                  "mdbHome",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                accountEmail: Text(
+                  FirebaseAuth.instance.currentUser?.email ?? "",
+                  style: const TextStyle(color: Colors.white70),
+                ),
+                currentAccountPicture: const CircleAvatar(
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.home, color: Colors.blueGrey, size: 40),
                 ),
               ),
-              // Titulo principal: mdbHome (con sombra para legibilidad)
-              accountName: const Text(
-                'mdbHome',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black45,
-                      blurRadius: 4,
-                      offset: Offset(2, 2),
-                    ),
-                  ],
+
+              ListTile(
+                leading: const Icon(Icons.lightbulb),
+                title: const Text("Luces Interiores"),
+                onTap: () => _updateScreen(
+                  const LucesInterioresScreen(),
+                  "Luces Interiores",
                 ),
               ),
-              // Subtítulo (opcional)
-              accountEmail: const Text(
-                'Sistema de Control Inteligente',
-                style: TextStyle(
-                  color: Colors.white70,
-                  shadows: [Shadow(color: Colors.black45, blurRadius: 2)],
+              ListTile(
+                leading: const Icon(Icons.wb_sunny),
+                title: const Text("Luces Exteriores"),
+                onTap: () => _updateScreen(
+                  const LucesExterioresScreen(),
+                  "Luces Exteriores",
                 ),
               ),
-              // Aquí podrías poner un logo circular si quisieras
-              currentAccountPicture: const CircleAvatar(
-                backgroundColor: Colors.white24,
-                child: Icon(
-                  Icons.home_work_outlined,
-                  color: Colors.white,
-                  size: 30,
+              ListTile(
+                leading: const Icon(Icons.settings_remote),
+                title: const Text("Multimedia (NAD)"),
+                onTap: () => _updateScreen(
+                  const Center(child: Text("Pantalla Multimedia")),
+                  "Multimedia",
                 ),
               ),
-            ),
-            // Opciones del Menú (puedes usar iconos neomórficos aquí más adelante)
-            _menuItem(
-              'assets/images/luces.png',
-              'Luces Interiores',
-              const LucesIntScreen(),
-            ),
-            _menuItem(
-              'assets/images/focos.png',
-              'Luces Exteriores',
-              const LucesExtScreen(),
-            ),
-            _menuItem(
-              'assets/images/piscina.png',
-              'Luz Piscina',
-              const LuzPiscinaScreen(),
-            ),
-            _menuItem(
-              'assets/images/multimedia.png',
-              'Multimedia',
-              const MultimediaScreen(),
-            ),
-            _menuItem('assets/images/clima.png', 'Clima', const ClimaScreen()),
-          ],
+              ListTile(
+                leading: const Icon(Icons.thermostat),
+                title: const Text("Clima y Sensores"),
+                onTap: () => _updateScreen(
+                  const Center(child: Text("Pantalla Clima")),
+                  "Clima",
+                ),
+              ),
+
+              const Divider(),
+
+              ListTile(
+                leading: const Icon(Icons.logout, color: Colors.redAccent),
+                title: const Text("Cerrar Sesión"),
+                onTap: () async {
+                  await FirebaseAuth.instance.signOut();
+                  if (mounted) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginScreen(),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
-      // El cuerpo dinámico que cambia según el menú
-      body: Container(padding: const EdgeInsets.all(16), child: _currentScreen),
-    );
-  }
-
-  // Widget auxiliar para crear los items del menú con consistencia
-  ListTile _menuItem(String assetPath, String label, Widget screen) {
-    return ListTile(
-      leading: Image.asset(
-        assetPath,
-        width:
-            24, // Ajustamos el tamaño para que coincida con un icono estándar
-        height: 24,
-        color: Colors
-            .black54, // Opcional: para darle un tono uniforme si el PNG es negro/gris
-      ),
-      title: Text(label, style: const TextStyle(color: Colors.black87)),
-      onTap: () => _updateScreen(screen, label),
     );
   }
 }

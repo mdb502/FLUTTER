@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'main_navigation_screen.dart'; // Tu esqueleto principal
+import 'main_navigation_screen.dart';
+import 'package:provider/provider.dart';
+import '../providers/luces_provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../services/mqtt_mgr.dart';
+import 'login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -21,31 +26,64 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500), // Duración de la animación
+      duration: const Duration(milliseconds: 1500),
     );
 
-    // Animación del Logo: Inicia grande (2.0) y llega a tamaño normal (1.0)
     _logoScale = Tween<double>(
       begin: 2.5,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
-
-    // Animación del Texto: Inicia en cero y llega a su tamaño (1.0)
     _textScale = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
 
-    // Iniciar animación
     _controller.forward();
 
-    // Navegar a la pantalla principal tras 3 segundos
-    Timer(const Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-      );
+    // --- SOLUCIÓN AL ERROR ---
+    // Ejecuta la carga una vez que el Splash esté dibujado
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _cargarDatosYNavigar();
     });
+  }
+
+  Future<void> _cargarDatosYNavigar() async {
+    // 1. Verificamos si ya hay una sesión activa de Firebase
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      // CASO: YA ESTÁS LOGUEADO
+      final lucesProv = Provider.of<LucesProvider>(context, listen: false);
+
+      try {
+        // Intentamos cargar los datos (ahora tenemos permiso)
+        await lucesProv.inicializarConfiguracion();
+        final mqtt = Provider.of<MqttMgr>(context, listen: false);
+        await mqtt.conectar();
+      } catch (e) {
+        debugPrint("Error al cargar datos protegidos: $e");
+      }
+
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
+        );
+      }
+    } else {
+      // CASO: PRIMERA VEZ O SIN SESIÓN
+      // Esperamos un poco para que veas tu logo animado
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const LoginScreen(),
+          ), // La pantalla neomórfica
+        );
+      }
+    }
   }
 
   @override
