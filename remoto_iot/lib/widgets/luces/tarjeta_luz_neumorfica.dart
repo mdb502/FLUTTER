@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/dispositivo_model.dart';
+import '../../models/dispositivo_model.dart';
 
 class TarjetaLuzNeomorfica extends StatelessWidget {
   final DispositivoESP luz;

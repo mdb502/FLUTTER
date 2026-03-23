@@ -1,3 +1,4 @@
+// lib/models/dispositivo_model.dart
 import '../config/app_config.dart';
 
 class DispositivoESP {

@@ -1,33 +1,51 @@
+// lib/services/firebase_service.dart
 import 'package:firebase_database/firebase_database.dart';
 import '../models/dispositivo_model.dart';
+import '../models/control_remoto.dart';
 
 class FirebaseService {
-  final DatabaseReference _dbRef = FirebaseDatabase.instance.ref();
+  final DatabaseReference _db = FirebaseDatabase.instance.ref();
 
+  // --- FUNCIÓN PARA LUCES (CORREGIDA) ---
   Future<List<DispositivoESP>> obtenerConfiguracionLuces() async {
-    List<DispositivoESP> listaTemporal = [];
-
     try {
-      final snapshot = await _dbRef.child('CLuces').get();
-
+      final snapshot = await _db.child('CLuces').get();
       if (snapshot.exists) {
-        // Firebase nos devuelve un Map<dynamic, dynamic>
-        final Map<dynamic, dynamic> data = snapshot.value as Map;
+        final Map<dynamic, dynamic> data =
+            snapshot.value as Map<dynamic, dynamic>;
 
-        // Recorremos cada entrada del mapa
-        data.forEach((key, value) {
-          // key es "L01", value son sus datos {idx: 1, ubi: "Living", ...}
-          final dispositivo = DispositivoESP.fromJson(
-            key.toString(), // El primer argumento: ID
-            Map<dynamic, dynamic>.from(value), // El segundo argumento: Datos
-          );
-          listaTemporal.add(dispositivo);
-        });
+        // 1. Usamos DispositivoESP (con ESP al final)
+        // 2. Usamos .fromJson que es el constructor que tienes en tu modelo
+        return data.entries
+            .map(
+              (e) => DispositivoESP.fromJson(
+                e.key.toString(),
+                e.value as Map<dynamic, dynamic>,
+              ),
+            )
+            .toList();
       }
+      return [];
     } catch (e) {
-      print("Error en FirebaseService: $e");
+      print("❌ Error al obtener configuración de luces: $e");
+      return [];
     }
+  }
 
-    return listaTemporal;
+  // --- FUNCIÓN PARA MULTIMEDIA ---
+  Future<List<ControlRemoto>> obtenerControlesRemotos() async {
+    try {
+      final snapshot = await _db.child('CRemotos').get();
+      if (snapshot.exists) {
+        final Map<dynamic, dynamic> data =
+            snapshot.value as Map<dynamic, dynamic>;
+        // Convertimos las llaves (IDs como Amplifier_NAD_C350) en objetos
+        return data.keys.map((id) => ControlRemoto(id.toString())).toList();
+      }
+      return [];
+    } catch (e) {
+      print("❌ Error al obtener CRemotos: $e");
+      return [];
+    }
   }
 }

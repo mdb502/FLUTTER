@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/luces_provider.dart';
-import '../widgets/tarjeta_luz_neumorfica.dart';
+import '../widgets/luces/tarjeta_luz_neumorfica.dart';
 import '../services/mqtt_mgr.dart';
 
 class LucesInterioresScreen extends StatelessWidget {

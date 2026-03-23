@@ -1,3 +1,4 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -31,7 +32,7 @@ void main() async {
         // Pasamos la instancia ya creada de LucesProvider
         ChangeNotifierProvider<LucesProvider>.value(value: lucesProv),
         // Pasamos el MqttMgr ya vinculado a ese provider
-        Provider<MqttMgr>.value(value: mqttServicio),
+        ChangeNotifierProvider<MqttMgr>.value(value: mqttServicio),
       ],
       child: const MyApp(),
     ),

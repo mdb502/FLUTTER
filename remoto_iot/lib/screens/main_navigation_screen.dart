@@ -1,8 +1,16 @@
+// lib/screen/main_navigation_screen.dart
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
+import '../services/mqtt_mgr.dart';
+import '../providers/luces_provider.dart';
 import 'luces_int_screen.dart';
 import 'luces_ext_screen.dart';
+import 'luz_piscina_screen.dart';
+import 'multimedia_hub_screen.dart';
+import 'clima_screen.dart';
 import 'login_screen.dart';
+//import '../models/control_remoto.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   const MainNavigationScreen({super.key});
@@ -12,7 +20,8 @@ class MainNavigationScreen extends StatefulWidget {
 }
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
-  // Volvemos al manejo de estados por Widget y Título
+  late MqttMgr _mqttMgr;
+
   Widget _currentScreen = const LucesInterioresScreen();
   String _currentTitle = 'Luces Interiores';
 
@@ -21,7 +30,16 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
       _currentScreen = screen;
       _currentTitle = title;
     });
-    Navigator.pop(context); // Cierra el drawer al seleccionar
+    Navigator.pop(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Mantenemos la inicialización crítica de MQTT
+    final lucesProvider = Provider.of<LucesProvider>(context, listen: false);
+    _mqttMgr = MqttMgr(lucesProvider);
+    _mqttMgr.conectar();
   }
 
   @override
@@ -33,10 +51,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         elevation: 0,
         foregroundColor: Colors.black54,
       ),
-
       body: _currentScreen,
-
-      // Espacio reservado para la futura barra informativa
       bottomNavigationBar: Container(
         height: 60,
         color: const Color(0xFFE0E5EC),
@@ -47,7 +62,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
           ),
         ),
       ),
-
       drawer: Drawer(
         child: Container(
           color: const Color(0xFFE0E5EC),
@@ -79,44 +93,61 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 ),
               ),
 
+              // 1. LUCES INTERIORES (Restaurado)
               ListTile(
-                leading: const Icon(Icons.lightbulb),
+                leading: Image.asset('assets/images/luces.png', width: 24),
                 title: const Text("Luces Interiores"),
                 onTap: () => _updateScreen(
                   const LucesInterioresScreen(),
                   "Luces Interiores",
                 ),
               ),
+
+              // 2. LUCES EXTERIORES (Con imagen asset)
               ListTile(
-                leading: const Icon(Icons.wb_sunny),
+                leading: Image.asset('assets/images/focos.png', width: 24),
                 title: const Text("Luces Exteriores"),
                 onTap: () => _updateScreen(
                   const LucesExterioresScreen(),
                   "Luces Exteriores",
                 ),
               ),
+
+              // 3. LUZ PISCINA
               ListTile(
-                leading: const Icon(Icons.settings_remote),
-                title: const Text("Multimedia (NAD)"),
+                leading: Image.asset('assets/images/piscina.png', width: 24),
+                title: const Text("Luz Piscina"),
+                onTap: () =>
+                    _updateScreen(const LuzPiscinaScreen(), "Luz Piscina"),
+              ),
+
+              // 4. MULTIMEDIA (Única instancia corregida)
+              ListTile(
+                leading: Image.asset('assets/images/multimedia.png', width: 24),
+                title: const Text("Multimedia"),
                 onTap: () => _updateScreen(
-                  const Center(child: Text("Pantalla Multimedia")),
-                  "Multimedia",
+                  const MultimediaHubScreen(),
+                  "Gestión Multimedia",
                 ),
               ),
+
+              // 5. CLIMA
               ListTile(
-                leading: const Icon(Icons.thermostat),
+                leading: Image.asset('assets/images/clima.png', width: 24),
                 title: const Text("Clima y Sensores"),
-                onTap: () => _updateScreen(
-                  const Center(child: Text("Pantalla Clima")),
-                  "Clima",
-                ),
+                onTap: () =>
+                    _updateScreen(const ClimaScreen(), "Clima y sensores"),
               ),
 
               const Divider(),
 
+              // 5. CERRAR SESIÓN (Lógica sensible de Firebase mantenida)
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.redAccent),
-                title: const Text("Cerrar Sesión"),
+                title: const Text(
+                  "Cerrar Sesión",
+                  style: TextStyle(color: Colors.redAccent),
+                ),
                 onTap: () async {
                   await FirebaseAuth.instance.signOut();
                   if (mounted) {
