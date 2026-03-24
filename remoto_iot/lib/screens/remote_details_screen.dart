@@ -6,6 +6,7 @@ import 'package:provider/provider.dart'; // Importante
 import '../services/mqtt_mgr.dart'; // Tu archivo de manager
 import '../theme/app_theme.dart';
 import '../widgets/remote_layouts/amplifier_layout.dart';
+import '../widgets/remote_layouts/receiver_layout.dart';
 
 class RemoteDetailsScreen extends StatefulWidget {
   final String equipoId;
@@ -72,7 +73,15 @@ class _RemoteDetailsScreenState extends State<RemoteDetailsScreen> {
   }
 
   void _executeMacro(String macroId) async {
-    debugPrint("Ejecutando Macro: $macroId");
+    if (macroId.startsWith("MACRO_RADIO_")) {
+      String secuencia = macroId.replaceFirst("MACRO_RADIO_", ""); // Ej: "941"
+
+      for (int i = 0; i < secuencia.length; i++) {
+        _sendSingleCommand(secuencia[i]);
+        // 500ms es un buen estándar, pero si el receptor "se come" números, sube a 700ms
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+    }
   }
 
   @override
@@ -84,39 +93,55 @@ class _RemoteDetailsScreenState extends State<RemoteDetailsScreen> {
         actions: [
           Switch(
             value: _isLearningMode,
-            activeColor: AppColors.accent,
+            // REEMPLAZO: activeColor ya no se usa
+            activeThumbColor: AppColors.accent,
+            activeTrackColor: AppColors.accent.withValues(
+              alpha: 0.5,
+            ), // Color de la pista al estar activo
+            inactiveThumbColor:
+                Colors.grey, // Color del círculo al estar apagado
             onChanged: (val) => setState(() => _isLearningMode = val),
           ),
         ],
       ),
       body: StreamBuilder<DatabaseEvent>(
         stream: FirebaseDatabase.instance
-            .ref("CRemotos/${widget.equipoId}")
+            .ref()
+            .child('CRemotos/${widget.equipoId}')
             .onValue,
         builder: (context, snapshot) {
-          if (snapshot.hasError)
-            return const Center(child: Text("Error de conexión"));
-          if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final Map<dynamic, dynamic> data =
-              snapshot.data!.snapshot.value as Map;
+          if (snapshot.hasError || snapshot.data?.snapshot.value == null) {
+            return const Center(child: Text("Sin datos disponibles"));
+          }
 
-          List<String> inputsEncontrados = data.keys
-              .map((e) => e.toString())
-              .where((key) => key.startsWith("input_"))
+          // Extraemos la data y quitamos el warning de "variable no usada"
+          final Map<dynamic, dynamic> data = Map<dynamic, dynamic>.from(
+            snapshot.data!.snapshot.value as Map,
+          );
+
+          // Buscamos los inputs (solo para el amplificador NAD)
+          final List<String> inputsEncontrados = data.keys
+              .where((k) => k.toString().startsWith('INP_'))
+              .map((k) => k.toString())
               .toList();
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-            child: AmplifierLayout(
-              isLearningMode: _isLearningMode,
-              espId: widget.espId,
-              equipoId: widget.equipoId,
-              inputs: inputsEncontrados,
-              onAction: (cmd, isMacro) => _processAction(cmd, isMacro),
-            ),
+            child: widget.equipoId.toLowerCase().contains('receiver')
+                ? ReceiverLayout(
+                    onAction: (cmd, isMacro) => _processAction(cmd, isMacro),
+                  )
+                : AmplifierLayout(
+                    isLearningMode: _isLearningMode,
+                    espId: widget.espId,
+                    equipoId: widget.equipoId,
+                    inputs: inputsEncontrados, // Ahora sí está definida
+                    onAction: (cmd, isMacro) => _processAction(cmd, isMacro),
+                  ),
           );
         },
       ),
