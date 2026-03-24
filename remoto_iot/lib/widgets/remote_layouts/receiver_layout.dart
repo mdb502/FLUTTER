@@ -1,3 +1,4 @@
+// widgets/remote_layouts/receiver_layout.dart
 import 'package:flutter/material.dart';
 import '../../../theme/app_theme.dart';
 import 'buttons/round_button.dart';
@@ -138,10 +139,16 @@ class ReceiverLayout extends StatelessWidget {
                   .toList(),
             ),
           ),
-        buildRoundButton(
-          label: "0",
-          isLearned: true,
-          onTap: () => onAction("0", false),
+        // BOTÓN 0: Enuelto en Row para mantener su forma circular (60x60)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            buildRoundButton(
+              label: "0",
+              isLearned: true,
+              onTap: () => onAction("0", false),
+            ),
+          ],
         ),
       ],
     );
@@ -163,7 +170,6 @@ class ReceiverLayout extends StatelessWidget {
           color: AppColors.background,
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
-            // REEMPLAZO DE withOpacity por withValues
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.2),
               offset: const Offset(3, 3),
